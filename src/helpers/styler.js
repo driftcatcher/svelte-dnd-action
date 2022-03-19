@@ -1,6 +1,6 @@
 import {SHADOW_ELEMENT_ATTRIBUTE_NAME, DRAGGED_ELEMENT_ID} from "../constants";
 import {findCenter} from "./intersection";
-import { svelteNodeClone } from "./svelteNodeClone";
+import {svelteNodeClone} from "./svelteNodeClone";
 
 const TRANSITION_DURATION_SECONDS = 0.2;
 
@@ -124,7 +124,7 @@ export function styleDraggable(draggableEl, dragDisabled) {
     if (!dragDisabled) {
         draggableEl.style.userSelect = "none";
         draggableEl.style.WebkitUserSelect = "none";
-        draggableEl.style.cursor = "grab";
+        // draggableEl.style.cursor = "grab";
     } else {
         draggableEl.style.userSelect = "";
         draggableEl.style.WebkitUserSelect = "";
