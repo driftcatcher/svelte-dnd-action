@@ -235,35 +235,40 @@ function handleDrop() {
         shadowElDropZone = originDropZone;
     }
     printDebug(() => ["dropped in dz", shadowElDropZone]);
-    let {items, type} = dzToConfig.get(shadowElDropZone);
-    styleInactiveDropZones(
-        typeToDropZones.get(type),
-        dz => dzToConfig.get(dz).dropTargetStyle,
-        dz => dzToConfig.get(dz).dropTargetClasses
-    );
-    let shadowElIdx = findShadowElementIdx(items);
-    // the handler might remove the shadow element, ex: dragula like copy on drag
-    if (shadowElIdx === -1) shadowElIdx = originIndex;
-    items = items.map(item => (item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? draggedElData : item));
-    function finalizeWithinZone() {
-        unlockOriginDzMinDimensions();
-        dispatchFinalizeEvent(shadowElDropZone, items, {
-            trigger: isDraggedOutsideOfAnyDz ? TRIGGERS.DROPPED_OUTSIDE_OF_ANY : TRIGGERS.DROPPED_INTO_ZONE,
-            id: draggedElData[ITEM_ID_KEY],
-            source: SOURCES.POINTER
-        });
-        if (shadowElDropZone !== originDropZone) {
-            // letting the origin drop zone know the element was permanently taken away
-            dispatchFinalizeEvent(originDropZone, dzToConfig.get(originDropZone).items, {
-                trigger: TRIGGERS.DROPPED_INTO_ANOTHER,
+    try {
+        let {items, type} = dzToConfig.get(shadowElDropZone);
+        styleInactiveDropZones(
+            typeToDropZones.get(type),
+            dz => dzToConfig.get(dz).dropTargetStyle,
+            dz => dzToConfig.get(dz).dropTargetClasses
+        );
+        let shadowElIdx = findShadowElementIdx(items);
+        // the handler might remove the shadow element, ex: dragula like copy on drag
+        if (shadowElIdx === -1) shadowElIdx = originIndex;
+        items = items.map(item => (item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? draggedElData : item));
+        // eslint-disable-next-line no-inner-declarations
+        function finalizeWithinZone() {
+            unlockOriginDzMinDimensions();
+            dispatchFinalizeEvent(shadowElDropZone, items, {
+                trigger: isDraggedOutsideOfAnyDz ? TRIGGERS.DROPPED_OUTSIDE_OF_ANY : TRIGGERS.DROPPED_INTO_ZONE,
                 id: draggedElData[ITEM_ID_KEY],
                 source: SOURCES.POINTER
             });
+            if (shadowElDropZone !== originDropZone) {
+                // letting the origin drop zone know the element was permanently taken away
+                dispatchFinalizeEvent(originDropZone, dzToConfig.get(originDropZone).items, {
+                    trigger: TRIGGERS.DROPPED_INTO_ANOTHER,
+                    id: draggedElData[ITEM_ID_KEY],
+                    source: SOURCES.POINTER
+                });
+            }
+            unDecorateShadowElement(shadowElDropZone.children[shadowElIdx]);
+            cleanupPostDrop();
         }
-        unDecorateShadowElement(shadowElDropZone.children[shadowElIdx]);
-        cleanupPostDrop();
+        animateDraggedToFinalPosition(shadowElIdx, finalizeWithinZone);
+    } catch (err) {
+        console.warn(err);
     }
-    animateDraggedToFinalPosition(shadowElIdx, finalizeWithinZone);
 }
 
 // helper function for handleDrop

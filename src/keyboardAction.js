@@ -173,18 +173,22 @@ export function dndzone(node, options) {
         switch (e.key) {
             case "Enter":
             case " ": {
-                // we don't want to affect nested input elements or clickable elements
-                if ((e.target.disabled !== undefined || e.target.href || e.target.isContentEditable) && !allDragTargets.has(e.target)) {
-                    return;
-                }
-                e.preventDefault(); // preventing scrolling on spacebar
-                e.stopPropagation();
-                if (isDragging) {
-                    // TODO - should this trigger a drop? only here or in general (as in when hitting space or enter outside of any zone)?
-                    handleDrop();
-                } else {
-                    // drag start
-                    handleDragStart(e);
+                try {
+                    // we don't want to affect nested input elements or clickable elements
+                    if ((e.target.disabled !== undefined || e.target.href || e.target.isContentEditable) && !allDragTargets.has(e.target)) {
+                        return;
+                    }
+                    e.preventDefault(); // preventing scrolling on spacebar
+                    e.stopPropagation();
+                    if (isDragging) {
+                        // TODO - should this trigger a drop? only here or in general (as in when hitting space or enter outside of any zone)?
+                        handleDrop();
+                    } else {
+                        // drag start
+                        handleDragStart(e);
+                    }
+                } catch (err) {
+                    console.warn(err);
                 }
                 break;
             }
